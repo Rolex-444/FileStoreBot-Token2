@@ -76,7 +76,7 @@ async def start_command(client: Client, message: Message):
             if len(argument) == 3:
                 try:
                     start = int(int(argument[1]) / abs(client.db_channel.id))
-                    end = int(int(argument) / abs(client.db_channel.id))
+                    end = int(int(argument) / abs(client.db_channel.id))  # Fixed this line
                 except:
                     return
                 if start <= end:
@@ -260,4 +260,4 @@ Unsuccessful: <code>{unsuccessful}</code></b>"""
         msg = await message.reply(REPLY_ERROR)
         await asyncio.sleep(8)
         await msg.delete()
-            
+                                
