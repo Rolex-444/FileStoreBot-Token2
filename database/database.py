@@ -22,6 +22,8 @@ def new_user(id):
             'verify_token': "",
             'link': ""
         }
+        'download_count': 0  # add this line
+
     }
 
 async def present_user(user_id: int):
@@ -50,3 +52,16 @@ async def full_userbase():
 async def del_user(user_id: int):
     await user_data.delete_one({'_id': user_id})
     return
+
+async def get_user_download_count(user_id: int) -> int:
+    user = await user_data.find_one({'_id': user_id})
+    if user and 'download_count' in user:
+        return user['download_count']
+    return 0
+
+async def increment_user_download_count(user_id: int):
+    await user_data.update_one({'_id': user_id}, {'$inc': {'download_count': 1}})
+
+async def reset_user_download_count(user_id: int):
+    await user_data.update_one({'_id': user_id}, {'$set': {'download_count': 0}})
+    
