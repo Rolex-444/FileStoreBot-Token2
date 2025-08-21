@@ -1,4 +1,5 @@
-#(Â©)CodeXBotz
+#(©)CodeXBotz
+
 import asyncio
 import base64
 import logging
@@ -29,7 +30,10 @@ from config import (
     OWNER_ID,
 )
 from helper_func import subscribed, encode, decode, get_messages, get_shortlink, get_verify_status, update_verify_status, get_exp_time
-from database.database import add_user, del_user, full_userbase, present_user
+
+# Import download count helpers
+from database.database import get_user_download_count, increment_user_download_count, db_verify_status
+
 from shortzy import Shortzy
 
 @Bot.on_message(filters.command('start') & filters.private & subscribed)
@@ -40,7 +44,6 @@ async def start_command(client: Client, message: Message):
     # Check if the user is the owner
     if id == owner_id:
         # Owner-specific actions
-        # You can add any additional actions specific to the owner here
         await message.reply("You are the owner! Additional actions can be added here.")
 
     else:
@@ -73,11 +76,11 @@ async def start_command(client: Client, message: Message):
             if len(argument) == 3:
                 try:
                     start = int(int(argument[1]) / abs(client.db_channel.id))
-                    end = int(int(argument[2]) / abs(client.db_channel.id))
+                    end = int(int(argument) / abs(client.db_channel.id))
                 except:
                     return
                 if start <= end:
-                    ids = range(start, end+1)
+                    ids = range(start, end + 1)
                 else:
                     ids = []
                     i = start
@@ -100,6 +103,16 @@ async def start_command(client: Client, message: Message):
             await temp_msg.delete()
 
             for msg in messages:
+                count = await get_user_download_count(id)
+                verify_status = await db_verify_status(id)
+                is_verified = verify_status.get('is_verified', False)
+
+                if count >= 3 and not is_verified:
+                    await message.reply("⚠️ You have reached your free download limit of 3 videos.\nPlease verify your token to continue.")
+                    return
+
+                await increment_user_download_count(id)
+
                 if bool(CUSTOM_CAPTION) & bool(msg.document):
                     caption = CUSTOM_CAPTION.format(previouscaption="" if not msg.caption else msg.caption.html, filename=msg.document.file_name)
                 else:
@@ -144,18 +157,15 @@ async def start_command(client: Client, message: Message):
                 full_tut_url = f"https://t.me/Sr_Movie_Links/52"
                 token = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
                 await update_verify_status(id, verify_token=token, link="")
-                link = await get_shortlink(SHORTLINK_URL, SHORTLINK_API,f'https://telegram.dog/{client.username}?start=verify_{token}')
+                link = await get_shortlink(SHORTLINK_URL, SHORTLINK_API, f'https://telegram.dog/{client.username}?start=verify_{token}')
                 btn = [
                     [InlineKeyboardButton("Click here", url=link)],
                     [InlineKeyboardButton('How to use the bot', url=full_tut_url)]
                 ]
                 await message.reply(f"Your Ads token is expired, refresh your token and try again.\n\nToken Timeout: {get_exp_time(VERIFY_EXPIRE)}\n\nWhat is the token?\n\nThis is an ads token. If you pass 1 ad, you can use the bot for 24 Hour after passing the ad.", reply_markup=InlineKeyboardMarkup(btn), protect_content=False, quote=True)
 
-# ... (rest of the code remains unchanged))
+# ... (rest of the code remains unchanged)
 
-
-    
-        
 #=====================================================================================##
 
 WAIT_MSG = """"<b>Processing ...</b>"""
@@ -164,15 +174,14 @@ REPLY_ERROR = """<code>Use this command as a replay to any telegram message with
 
 #=====================================================================================##
 
-    
-    
 @Bot.on_message(filters.command('start') & filters.private)
 async def not_joined(client: Client, message: Message):
     buttons = [
         [
             InlineKeyboardButton(
                 "Join Channel",
-                url = client.invitelink)
+                url = client.invitelink
+            )
         ]
     ]
     try:
@@ -180,7 +189,7 @@ async def not_joined(client: Client, message: Message):
             [
                 InlineKeyboardButton(
                     text = 'Try Again',
-                    url = f"https://t.me/{client.username}?start={message.command[1]}"
+                    url = f"<https://t.me/{client.username}?start={message.command>[1]}"
                 )
             ]
         )
@@ -251,3 +260,4 @@ Unsuccessful: <code>{unsuccessful}</code></b>"""
         msg = await message.reply(REPLY_ERROR)
         await asyncio.sleep(8)
         await msg.delete()
+            
