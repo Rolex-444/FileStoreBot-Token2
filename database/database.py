@@ -21,7 +21,7 @@ def new_user(id):
             'verified_time': "",
             'verify_token': "",
             'link': ""
-        }
+        },
         'download_count': 0  # add this line
 
     }
