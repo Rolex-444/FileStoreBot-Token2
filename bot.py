@@ -65,6 +65,9 @@ class Bot(Client):
 ░╚════╝░░╚════╝░╚═════╝░╚══════╝╚═╝░░╚═╝╚═════╝░░╚════╝░░░░╚═╝░░░╚══════╝
                                           """)
         self.username = usr_bot_me.username
+        
+        PORT = 8081
+            
         #web-response
         app = web.AppRunner(await web_server())
         await app.setup()
