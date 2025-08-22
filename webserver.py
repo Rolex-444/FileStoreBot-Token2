@@ -1,5 +1,5 @@
 from aiohttp import web
-import threading
+import asyncio
 
 async def handle(request):
     return web.Response(text="Bot is alive")
@@ -7,9 +7,15 @@ async def handle(request):
 app = web.Application()
 app.add_routes([web.get('/', handle)])
 
-def run_webserver():
-    web.run_app(app, host='0.0.0.0', port=8080)
+async def start_webserver():
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, '0.0.0.0', 8080)
+    await site.start()
+    print("Webserver started at http://0.0.0.0:8080/")
 
-def start():
-    threading.Thread(target=run_webserver).start()
+# To run this as part of your main program, you would do:
+if __name__ == "__main__":
+    asyncio.run(start_webserver())
+    
   
