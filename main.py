@@ -1,11 +1,18 @@
 from bot import Bot
 import pyrogram.utils
-import webserver             # <--- Add this line
+from webserver import start_webserver
+import asyncio
 
 print("Bot is starting...")
 
 pyrogram.utils.MIN_CHANNEL_ID = -1002297453351
 
-webserver.start()            # <--- Add this line to start the web server
+async def main():
+    await asyncio.gather(
+        start_webserver(),
+        Bot().start()
+    )
 
-Bot().run()
+if __name__ == "__main__":
+    asyncio.run(main())
+  
